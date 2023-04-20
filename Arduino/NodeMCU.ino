@@ -1,4 +1,5 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 
 const int MAX_NETWORKS = 20;
 const int MAX_RSSI_VALUES = 30;
@@ -20,6 +21,46 @@ float rssiParaDistancia(int rssi) {
   
   return distancia;
 }
+
+void sendNetworkData() {
+  HTTPClient http;
+
+  String url = "http://example.com/wifi_data"; // Endereço URL da API
+  int port = 80; // Porta padrão do HTTP
+
+  http.begin(url, port); // Inicializa a conexão com a API
+
+  // Define o cabeçalho da requisição
+  http.addHeader("Content-Type", "application/json");
+
+  // Monta um JSON com as informações dos pontos de acesso coletados
+  String json = "{ \"networks\": [";
+  for (int i = 0; i < numNetworks; i++) {
+    json += "{";
+    json += "\"mac\": \"" + networks[i].macAddress + "\",";
+    json += "\"bssid\": \"" + networks[i].bssid + "\",";
+    json += "\"rssi\": \"" + String(networks[i].avgRssi) + "\"";
+    json += "}";
+    if (i < numNetworks - 1) {
+      json += ",";
+    }
+  }
+  json += "]}";
+
+  // Envia a requisição HTTP POST com os dados coletados
+  int httpResponseCode = http.POST(json);
+
+  // Verifica se a requisição foi bem sucedida
+  if (httpResponseCode == 200) {
+    Serial.println("Dados enviados com sucesso!");
+  } else {
+    Serial.println("Falha ao enviar dados.");
+  }
+
+  // Finaliza a conexão com a API
+  http.end();
+}
+
 
 Network networks[MAX_NETWORKS];
 int numNetworks = 0;

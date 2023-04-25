@@ -1,7 +1,7 @@
 from django.db import models
 
 class WifiNode(models.Model):
-    node_name = models.CharField(max_length=50, null=True) #location where wifi node is placed
+    node_name = models.CharField(max_length=50, unique=True, null=False, default='') #location where wifi node is placed
     bssid = models.CharField(max_length=17) #mac address
     ssid = models.CharField(max_length=32) #network name
     rssi = models.IntegerField() #signal strength

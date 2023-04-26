@@ -69,6 +69,20 @@ void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   delay(10);
+
+  // Conecta à rede WiFi
+  WiFi.begin("WLL-Inatel", "inatelsemfio");
+
+  // Espera até que a conexão seja estabelecida
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Tentando conectar à rede WiFi...");
+  }
+
+  // Imprime o endereço IP atribuído ao ESP8266
+  Serial.println("Conectado à rede WiFi!");
+  Serial.print("Endereço IP: ");
+  Serial.println(WiFi.localIP());
 }
 
 void loop() {

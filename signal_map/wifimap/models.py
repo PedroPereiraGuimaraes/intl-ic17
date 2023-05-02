@@ -11,13 +11,16 @@ class WifiNode(models.Model):
     
     def calculate_distance(self, rssi):
         #rssi per meter
-        a = -50
+        a = -40
         # rssi - rssi/meter divided by pathLoss
         w = (rssi-a)/-20
         #log distance
         distance = 10**w
         
         return distance
+
+    def __str__(self):
+        return self.node_name
 
     def save(self, *args, **kwargs):
         self.distance = self.calculate_distance(self.rssi)

@@ -11,7 +11,7 @@ class DeviceLocation(models.Model):
     
     def calculate_distance(self, rssi):
         #rssi per meter
-        a = -50
+        a = -40
         # rssi - rssi/meter divided by pathLoss
         w = (rssi-a)/-20
         #log distance

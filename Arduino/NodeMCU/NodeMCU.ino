@@ -13,22 +13,26 @@ struct Network {
   float avgRssi;
 };
 
+Network networks[MAX_NETWORKS];
+int numNetworks = 0;
+
 float rssiParaDistancia(int rssi) {
 
-  float a = -50;
+  float a = -40;
   float w = (rssi - a) / -40.0;
   float distancia = pow(10, w);
-  
+
   return distancia;
 }
 
 void sendNetworkData() {
+  WiFiClient client;
   HTTPClient http;
 
   String url = "http://example.com/wifi_data"; // Endereço URL da API
   int port = 80; // Porta padrão do HTTP
 
-  http.begin(url, port); // Inicializa a conexão com a API
+  http.begin(client, url, port, "/wifi_data"); // Inicializa a conexão com a API
 
   // Define o cabeçalho da requisição
   http.addHeader("Content-Type", "application/json");
@@ -56,14 +60,8 @@ void sendNetworkData() {
   } else {
     Serial.println("Falha ao enviar dados.");
   }
-
-  // Finaliza a conexão com a API
-  http.end();
 }
 
-
-Network networks[MAX_NETWORKS];
-int numNetworks = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -114,6 +112,7 @@ void loop() {
         newNetwork.numValues = 1;
         networks[numNetworks] = newNetwork;
         numNetworks++;
+        Serial.println(mac);
       }
     }
   }

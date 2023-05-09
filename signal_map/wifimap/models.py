@@ -3,9 +3,7 @@ from django.db import models
 class WifiNode(models.Model):
     node_name = models.CharField(max_length=50, unique=True, null=False, default='') #location where wifi node is placed
     bssid = models.CharField(max_length=17) #mac address
-    ssid = models.CharField(max_length=32) #network name
-    rssi = models.IntegerField() #signal strength
-    timestamp = models.DateTimeField(auto_now_add=True) #date and time
+    rssi = models.FloatField() #signal strength
     #use result from calculate_distance
     distance = models.FloatField(null=True)
     

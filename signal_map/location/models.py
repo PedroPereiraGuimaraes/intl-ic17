@@ -4,9 +4,7 @@ from django.db import models
 class DeviceLocation(models.Model):
     device_id = models.CharField(max_length=32)
     bssid = models.CharField(max_length=17)
-    ssid = models.CharField(max_length=32)
-    rssi = models.IntegerField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    rssi = models.FloatField()
     distance = models.FloatField(null=True)
     
     def calculate_distance(self, rssi):

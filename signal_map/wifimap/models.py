@@ -30,6 +30,9 @@ class WifiNode(models.Model):
 class UniqueNodeName(models.Model):
     node_name  = models.CharField(max_length=50, unique=True, null=False, default='') #location where wifi node is placed
     
+    def __str__(self):
+        return self.node_name
+    
 @receiver(post_save, sender=WifiNode)
 def create_unique_node_name(sender, instance, created, **kwargs):
     if created:

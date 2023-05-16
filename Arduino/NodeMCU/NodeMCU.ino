@@ -29,7 +29,7 @@ void sendNetworkData() {
   WiFiClient client;
   HTTPClient http;
 
-  String url = "http://example.com/wifi_data"; // Endereço URL da API
+  String url = "http://10.0.14.239:8000/devicel/"; // Endereço URL da API
   int port = 80; // Porta padrão do HTTP
 
   http.begin(client, url, port, "/wifi_data"); // Inicializa a conexão com a API
@@ -38,18 +38,19 @@ void sendNetworkData() {
   http.addHeader("Content-Type", "application/json");
 
   // Monta um JSON com as informações dos pontos de acesso coletados
-  String json = "{ \"networks\": [";
+  String json = "[";
   for (int i = 0; i < numNetworks; i++) {
     json += "{";
-    json += "\"mac\": \"" + networks[i].macAddress + "\",";
-    json += "\"bssid\": \"" + networks[i].bssid + "\",";
-    json += "\"rssi\": \"" + String(networks[i].avgRssi) + "\"";
+    json += "  \"device_id\": 1,\n";
+    json += "  \"bssid\": \"" + networks[i].macAddress + "\",\n";
+    json += "  \"rssi\": " + String(networks[i].avgRssi);
     json += "}";
     if (i < numNetworks - 1) {
       json += ",";
     }
   }
-  json += "]}";
+  json += "]";
+
 
   // Envia a requisição HTTP POST com os dados coletados
   int httpResponseCode = http.POST(json);
@@ -57,7 +58,11 @@ void sendNetworkData() {
   // Verifica se a requisição foi bem sucedida
   if (httpResponseCode == 200) {
     Serial.println("Dados enviados com sucesso!");
-  } else {
+  }
+  else if (httpResponseCode == 400) {
+    Serial.println("Json errado.");
+  }
+  else {
     Serial.println("Falha ao enviar dados.");
   }
 }
@@ -112,7 +117,6 @@ void loop() {
         newNetwork.numValues = 1;
         networks[numNetworks] = newNetwork;
         numNetworks++;
-        Serial.println(mac);
       }
     }
   }
@@ -146,6 +150,7 @@ void loop() {
         Serial.println(networks[i].avgRssi);
         Serial.println("Distância do Modem é de " + String(rssiParaDistancia(networks[i].avgRssi)) + " metros.");
         Serial.println("-----------------------\n");
+        sendNetworkData();
       }
     }
     lastMeasureTime = now;

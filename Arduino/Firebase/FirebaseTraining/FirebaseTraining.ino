@@ -132,10 +132,7 @@ void loop() {
 
   tm* timeinfo = localtime(&currentTime);
 
-  int year = timeinfo->tm_year + 1900;
-  int month = timeinfo->tm_mon + 1;
   int day = timeinfo->tm_mday;
-  int hour = timeinfo->tm_hour;
 
   int n = WiFi.scanNetworks();
   if (n == 0) {
@@ -190,16 +187,15 @@ void loop() {
     if (Firebase.ready() || sendDataPrevMillis == 0) {
       sendDataPrevMillis = millis();
       String time = timeClient.getFormattedTime();
+      String local = "biblioteca";
 
-      String mackey_add = "networks/" + String(year) + "/" + String(month) + "/" + String(day) + "/" + String(hour) + "/" + networks[i].macAddress + "/mac";
-      String mackey_bssid = "networks/" + String(year) + "/" + String(month) + "/" + String(day) + "/" + String(hour) + "/" + networks[i].macAddress + "/bssid";
-      String mackey_rssi = "networks/" + String(year) + "/" + String(month) + "/" + String(day) + "/" + String(hour) + "/" + networks[i].macAddress + "/rssi";
-      String mackey_hour = "networks/" + String(year) + "/" + String(month) + "/" + String(day) + "/" + String(hour) + "/" + networks[i].macAddress + "/hour";
+      String mackey_add = "training/" + String(local) + "/" +  networks[i].macAddress + "/mac";
+      String mackey_bssid = "training/" + String(local) + "/" +  networks[i].macAddress + "/bssid";
+      String mackey_rssi = "training/" + String(local) + "/" +  networks[i].macAddress + "/rssi";
 
       Serial.printf("SET MAC. %s\n", Firebase.RTDB.setString(&fbdo, mackey_add.c_str(), networks[i].macAddress) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET BSSID. %s\n", Firebase.RTDB.setString(&fbdo, mackey_bssid.c_str(), networks[i].bssid) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET AVG RSSI. %s\n", Firebase.RTDB.setFloat(&fbdo, mackey_rssi.c_str(), networks[i].avgRssi) ? "oK" : fbdo.errorReason().c_str());
-      Serial.printf("SET TIME. %s\n", Firebase.RTDB.setString(&fbdo, mackey_hour.c_str(), time) ? "oK" : fbdo.errorReason().c_str());
     }
   }
 }

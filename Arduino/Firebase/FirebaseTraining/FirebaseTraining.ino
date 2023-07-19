@@ -173,6 +173,7 @@ void loop() {
   for (int i = 0; i < numNetworks; i++) {
     FirebaseJson json;
     float sumRssi = 0;
+    int entrys = 0;
     int numValues = networks[i].numValues;
     int startIndex = numValues > MAX_RSSI_VALUES ? numValues - MAX_RSSI_VALUES : 0;
     for (int j = startIndex; j < numValues; j++) {
@@ -182,20 +183,21 @@ void loop() {
       networks[i].avgRssi = sumRssi / (numValues - startIndex);
       Serial.print("MAC: " + networks[i].macAddress);
       Serial.print("\nNome da Rede: " + networks[i].bssid + "\nRssi: ");
-      Serial.println(networks[i].avgRssi);
+      Serial.println(networks[i].avgRssi);                                                                                                       
     }
     if (Firebase.ready() || sendDataPrevMillis == 0) {
       sendDataPrevMillis = millis();
       String time = timeClient.getFormattedTime();
-      String local = "biblioteca";
+      String local = "ehealth";
 
-      String mackey_add = "training/" + String(local) + "/" +  networks[i].macAddress + "/mac";
-      String mackey_bssid = "training/" + String(local) + "/" +  networks[i].macAddress + "/bssid";
-      String mackey_rssi = "training/" + String(local) + "/" +  networks[i].macAddress + "/rssi";
+      String mackey_add = "training/teste/" + String(local) + "/" + entrys + "/" + networks[i].macAddress + "/mac";
+      String mackey_bssid = "training/teste/" + String(local) + "/" +  entrys + "/" + networks[i].macAddress + "/bssid";
+      String mackey_rssi = "training/teste/" + String(local) + "/" +  entrys + "/" + networks[i].macAddress + "/rssi";
 
       Serial.printf("SET MAC. %s\n", Firebase.RTDB.setString(&fbdo, mackey_add.c_str(), networks[i].macAddress) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET BSSID. %s\n", Firebase.RTDB.setString(&fbdo, mackey_bssid.c_str(), networks[i].bssid) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET AVG RSSI. %s\n", Firebase.RTDB.setFloat(&fbdo, mackey_rssi.c_str(), networks[i].avgRssi) ? "oK" : fbdo.errorReason().c_str());
+      entrys += 1;
     }
   }
 }

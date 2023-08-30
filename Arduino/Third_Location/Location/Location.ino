@@ -29,7 +29,7 @@ const int MAX_NETWORKS = 50;
 const int MAX_RSSI_VALUES = 50;
 
 // Intervalo de medição
-const int MEASURE_INTERVAL = 100;
+const int MEASURE_INTERVAL = 50;
 
 // Estrutura para armazenar informações da rede
 struct Network {
@@ -144,7 +144,6 @@ void loop() {
       // Comparando redes escaneadas com as redes existentes
       for (int j = 0; j < numNetworks; j++) {
         if (networks[j].macAddress == mac) {
-          Serial.println("É iguaall kkk");
           networks[j].rssiValues[networks[j].numValues] = rssi;
           networks[j].numValues++;
           break;
@@ -183,6 +182,7 @@ void loop() {
       Serial.printf("SET MAC. %s\n", Firebase.RTDB.setString(&fbdo, mackey_add.c_str(), networks[i].macAddress) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET BSSID. %s\n", Firebase.RTDB.setString(&fbdo, mackey_bssid.c_str(), networks[i].bssid) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET AVG RSSI. %s\n", Firebase.RTDB.setFloat(&fbdo, mackey_rssi.c_str(), networks[i].avgRssi) ? "oK" : fbdo.errorReason().c_str());
+      Serial.println("");
     }
   }
 }

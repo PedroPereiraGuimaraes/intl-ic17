@@ -48,11 +48,13 @@ unsigned long sendDataPrevMillis = 0;
 unsigned long count = 0;
 
 // Função para inserir informações de uma nova rede
-void insertNetworkInfo(const String &mac, const String &bssid) {
-  Network newNetwork;
-  newNetwork.macAddress = mac;
-  newNetwork.bssid = bssid;
-  numNetworks++;
+void addNetwork(String mac, String bssid) {
+  if (numNetworks < MAX_NETWORKS) {
+    networks[numNetworks].macAddress = mac;
+    networks[numNetworks].bssid = bssid;
+    networks[numNetworks].numValues = 0;
+    numNetworks++;
+  }
 }
 
 // Wi-Fi Multi para o Raspberry Pi Pico
@@ -65,7 +67,30 @@ void setup() {
   Serial.begin(115200);
 
   // Inserção das redes do Inatel
-  insertNetworkInfo("20:58:69:0E:AA:38", "WLL-Inatel");
+  addNetwork("10:27:F5:20:86:C4", "Pedro");
+  addNetwork("20:58:69:0E:AA:38", "WLL-Inatel");
+  addNetwork("30:87:D9:02:FA:C8", "WLL-Inatel");
+  addNetwork("30:87:D9:02:FE:08", "WLL-Inatel");
+  addNetwork("B4:79:C8:05:B9:38", "WLL-Inatel");
+  addNetwork("B4:79:C8:05:B9:A8", "WLL-Inatel");
+  addNetwork("B4:79:C8:05:C2:38", "WLL-Inatel");
+  addNetwork("B4:79:C8:05:C2:78", "WLL-Inatel");
+  addNetwork("B4:79:C8:38:B1:C8", "WLL-Inatel");
+  addNetwork("B4:79:C8:38:C0:B8", "WLL-Inatel");
+  addNetwork("B4:79:C8:39:31:28", "WLL-Inatel");
+  addNetwork("30:87:D9:42:FA:C8", "WLL-CDGHub");
+  addNetwork("6C:14:6E:3E:DB:50", "wlanaccessv2.0");
+  addNetwork("6C:14:6E:3E:DF:10", "wlanaccessv2.0");
+  addNetwork("6C:14:6E:3E:DB:51", "Huawei-Employee");
+  addNetwork("6C:14:6E:3E:DB:52", "Huawei-Employee");
+  addNetwork("6C:14:6E:3E:DE:71", "Huawei-Employee");
+  addNetwork("6C:14:6E:3E:DE:72", "Huawei-Employee");
+  addNetwork("B4:79:C8:45:C2:38", "Inatel-BRDC-V");
+  addNetwork("B4:79:C8:45:C2:78", "Inatel-BRDC-V");
+  addNetwork("B4:79:C8:78:B1:C8", "Inatel-BRDC-V");
+  addNetwork("E8:1D:A8:30:F1:E8", "Inatel-BRDC-V");
+
+
 
   // Iniciar conexão Wi-Fi
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -116,14 +141,14 @@ void loop() {
       String bssid = WiFi.SSID(i);
       int rssi = WiFi.RSSI(i);
 
-      Serial.println(mac);
-      Serial.println(bssid);
-      Serial.println(rssi);
-      Serial.println(networks[i].macAddress);
-
-      if (networks[i].macAddress == mac) {
-        networks[i].rssiValues[networks[i].numValues] = rssi;
-        networks[i].numValues++;
+      // Comparando redes escaneadas com as redes existentes
+      for (int j = 0; j < numNetworks; j++) {
+        if (networks[j].macAddress == mac) {
+          Serial.println("É iguaall kkk");
+          networks[j].rssiValues[networks[j].numValues] = rssi;
+          networks[j].numValues++;
+          break;
+        }
       }
     }
   }
@@ -132,20 +157,29 @@ void loop() {
     FirebaseJson json;
     float sumRssi = 0;
     int numValues = networks[i].numValues;
+
+    // Calcular o índice inicial para calcular o valor médio de RSSI
     int startIndex = numValues > MAX_RSSI_VALUES ? numValues - MAX_RSSI_VALUES : 0;
+
+    // Calcular a soma dos valores de RSSI
     for (int j = startIndex; j < numValues; j++) {
       sumRssi += networks[i].rssiValues[j];
     }
+
+    // Calcular o valor médio de RSSI
     if ((numValues - startIndex) > 0) {
       networks[i].avgRssi = sumRssi / (numValues - startIndex);
     }
+
     if (Firebase.ready() || sendDataPrevMillis == 0) {
       sendDataPrevMillis = millis();
 
+      // Criar chaves para armazenar dados no Firebase
       String mackey_add = "networks/" + networks[i].macAddress + "/mac";
       String mackey_bssid = "networks/" + networks[i].macAddress + "/bssid";
       String mackey_rssi = "networks/" + networks[i].macAddress + "/rssi";
 
+      // Armazenar dados no Firebase
       Serial.printf("SET MAC. %s\n", Firebase.RTDB.setString(&fbdo, mackey_add.c_str(), networks[i].macAddress) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET BSSID. %s\n", Firebase.RTDB.setString(&fbdo, mackey_bssid.c_str(), networks[i].bssid) ? "oK" : fbdo.errorReason().c_str());
       Serial.printf("SET AVG RSSI. %s\n", Firebase.RTDB.setFloat(&fbdo, mackey_rssi.c_str(), networks[i].avgRssi) ? "oK" : fbdo.errorReason().c_str());

@@ -12,8 +12,8 @@
 #include <addons/RTDBHelper.h>
 
 // Informações da rede Wi-Fi e configurações do Firebase
-#define WIFI_SSID "Pedro"
-#define WIFI_PASSWORD "ronk1234"
+#define WIFI_SSID "WLL-Inatel"
+#define WIFI_PASSWORD "inatelsemfio"
 #define API_KEY "AIzaSyBQJUY7-kt1dBgn5FjeES1o_Bc_G-8AU6o"
 #define DATABASE_URL "https://esp8266-2dca6-default-rtdb.firebaseio.com/"
 #define USER_EMAIL "ppg108@hotmail.com"
@@ -76,10 +76,10 @@ void setup() {
   addNetwork("B4:79:C8:78:B1:C8", "Inatel-BRDC-V");
   addNetwork("E8:1D:A8:30:F1:E8", "Inatel-BRDC-V");
   // Redes da minha casa
-  addNetwork("10:27:F5:20:86:C4", "Pedro");
-  addNetwork("B0:A7:B9:F1:91:0F", "Cassio");
-  addNetwork("C0:06:C3:21:97:C8", "Lidiane Moreira");
-  addNetwork("28:EE:52:38:0D:20", "TP-Link_Yoda");
+  //addNetwork("10:27:F5:20:86:C4", "Pedro");
+  //addNetwork("B0:A7:B9:F1:91:0F", "Cassio");
+  //addNetwork("C0:06:C3:21:97:C8", "Lidiane Moreira");
+  //addNetwork("28:EE:52:38:0D:20", "TP-Link_Yoda");
 
   Serial.print("Connecting to Wi-Fi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -116,8 +116,8 @@ void sendDataToFirebase(String mac[], float rssi[]) {
   sendDataPrevMillis = millis();
 
   for (int i = 0; i < 3; i++) {
-    String macKey = "networks/" + String(i) + "/mac";    
-    String rssiKey = "networks/" + String(i) + "/rssi";  
+    String macKey = "networks/" + String(i) + "/mac";
+    String rssiKey = "networks/" + String(i) + "/rssi";
 
     Serial.printf("SET MAC. %s\n", Firebase.RTDB.setString(&fbdo, macKey.c_str(), mac[i]) ? "OK" : fbdo.errorReason().c_str());
     Serial.printf("SET AVG RSSI. %s\n", Firebase.RTDB.setFloat(&fbdo, rssiKey.c_str(), rssi[i]) ? "OK" : fbdo.errorReason().c_str());
@@ -159,14 +159,13 @@ void updateNetworkData(String mac, String bssid, int rssi, String macMax[], floa
           rssiMax[2] = rssiMax[1];
           rssiMax[1] = sumRssi / (numValues - startIndex);
           // Modificando os TOP MAC
-          macMax[1] = macMax[0];
+          macMax[2] = macMax[1];
           macMax[1] = mac;
         } else if (sumRssi / (numValues - startIndex) > rssiMax[2]) {
           rssiMax[2] = sumRssi / (numValues - startIndex);
           macMax[2] = mac;
         }
       }
-
       if (Firebase.ready() || sendDataPrevMillis == 0) {
         sendDataToFirebase(macMax, rssiMax);
       }
